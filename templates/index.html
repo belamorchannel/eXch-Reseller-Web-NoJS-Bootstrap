@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-4 text-center">
+    <div class="alert alert-primary bg-primary bg-opacity-10 border-primary text-light mx-auto mb-4 shadow-sm" style="max-width: 32rem;">
+        Your privacy and security come first. No cookies, no tracking techniques, no JavaScript.
+    </div>
+    <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+        <span class="badge bg-primary text-light px-3 py-2 shadow-sm">NO KYC</span>
+        <span class="badge bg-primary text-light px-3 py-2 shadow-sm">NO AML</span>
+        <span class="badge bg-primary text-light px-3 py-2 shadow-sm">INSTANT EXCHANGE</span>
+        <span class="badge bg-primary text-light px-3 py-2 shadow-sm">AUTOMATIC PROCESSING</span>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="row g-4">
+        <!-- Reserves Widget -->
+        <div class="col-md-6">
+            <h2 class="text-center fw-bold mb-4 text-light">Reserves</h2>
+            <div class="card bg-dark border-primary shadow">
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% if reserves %}
+                            {% for currency, amount in reserves.items() %}
+                                <div class="list-group-item bg-dark border-primary text-light d-flex justify-content-between align-items-center">
+                                    <span class="text-primary fw-medium">{{ currency }}{% if currency in erc20_currencies %} (ERC-20){% endif %}</span>
+                                    <span class="fw-medium">{{ "%.8f"|format(amount|float) }}</span>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center text-light p-3">Unable to load reserves at this time.</div>
+                        {% endif %}
+                    </div>
+                    {% if calculation and donation %}
+                    <div class="mt-4 p-3 bg-dark border border-primary rounded shadow-sm">
+                        <h3 class="fs-5 text-primary fw-medium mb-3">eXch Support for Privacy & Decentralization</h3>
+                        <div class="text-light">
+                            <div class="d-flex align-items-center gap-2">
+                                <svg class="text-success" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <div>
+                                    <span class="fw-medium">{{ donation.project }}</span>
+                                    <div class="text-xs text-light mt-1">
+                                        <span>{{ donation.amount }}</span>
+                                        <span class="mx-2">•</span>
+                                        <span>{{ donation.date }}</span>
+                                    </div>
+                                    <a href="https://etherscan.io/tx/{{ donation.txid }}" target="_blank" class="text-xs text-primary mt-1 d-block">View Transaction</a>
+                                </div>
+                            </div>
+                            <p class="mt-3 text-xs text-light">This is one of many donations made by eXch supporting privacy-focused and decentralized projects.</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Exchange Widget -->
+        <div class="col-md-6">
+            <h2 class="text-center fw-bold mb-4 text-light">Exchange</h2>
+            <div class="card bg-dark border-primary shadow">
+                <div class="card-body">
+                    {% if error %}
+                    <div class="alert alert-danger bg-danger bg-opacity-25 border-danger text-light mb-4">{{ error }}</div>
+                    {% endif %}
+                    <form action="{{ url_for('create_exchange') }}" method="POST">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium text-light">You Send</label>
+                                <div class="row g-2">
+                                    <div class="col">
+                                        <select name="from_currency" id="from_currency" class="form-select bg-dark border-primary text-light shadow-sm">
+                                            {% for currency in currencies %}
+                                                <option value="{{ currency }}" {% if form_data and form_data.from_currency == currency %}selected{% endif %}>
+                                                    {{ currency }}{% if currency in erc20_currencies %} (ERC-20){% endif %}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <input type="number" name="from_amount" step="0.00000001" class="form-control bg-dark border-primary text-light shadow-sm" value="{{ from_amount if from_amount else '' }}" placeholder="Amount" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium text-light">You Receive</label>
+                                <div class="row g-2">
+                                    <div class="col">
+                                        <select name="to_currency" id="to_currency" class="form-select bg-dark border-primary text-light shadow-sm">
+                                            {% for currency in currencies %}
+                                                <option value="{{ currency }}" {% if form_data and form_data.to_currency == currency %}selected{% endif %}>
+                                                    {{ currency }}{% if currency in erc20_currencies %} (ERC-20){% endif %}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <input type="number" step="0.00000001" class="form-control bg-dark border-primary text-light shadow-sm" value="{{ calculation.to_amount|round(8) if calculation and calculation.to_amount else '' }}" disabled placeholder="Estimated">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="form-label fw-medium text-light">Recipient Address</label>
+                            <input type="text" name="to_address" class="form-control bg-dark border-primary text-light shadow-sm" value="{{ form_data.to_address if form_data else '' }}" placeholder="Enter wallet address" required>
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="form-label fw-medium text-light">Refund Address (Optional)</label>
+                            <input type="text" name="refund_address" class="form-control bg-dark border-primary text-light shadow-sm" value="{{ form_data.refund_address if form_data else '' }}" placeholder="Enter refund address">
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="form-label fw-medium text-light">Rate Mode</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="rate_mode" value="flat" id="flat" {% if form_data and form_data.rate_mode == 'flat' %}checked{% endif %}>
+                                    <label class="form-check-label text-light" for="flat">Flat (1%)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="rate_mode" value="dynamic" id="dynamic" {% if (form_data and form_data.rate_mode == 'dynamic') or not form_data %}checked{% endif %}>
+                                    <label class="form-check-label text-light" for="dynamic">Dynamic (0.5%)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-3 mt-4">
+                            <button type="submit" name="action" value="calculate" class="btn btn-primary shadow">Calculate</button>
+                            <button type="submit" name="action" value="confirm" class="btn btn-success shadow">Exchange Now</button>
+                        </div>
+
+                        {% if calculation %}
+                        <div class="card mt-4 bg-dark border-primary shadow" id="calculation-results">
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-6 bg-primary bg-opacity-10 p-3 rounded shadow-sm">
+                                        <p class="text-light small">You Send</p>
+                                        <p class="fw-medium text-light">{{ "%.8f"|format(calculation.from_amount) }} <span class="text-primary">{{ calculation.from_currency }}{% if calculation.from_currency in erc20_currencies %} (ERC-20){% endif %}</span></p>
+                                    </div>
+                                    <div class="col-6 bg-primary bg-opacity-10 p-3 rounded shadow-sm">
+                                        <p class="text-light small">You Receive</p>
+                                        <p class="fw-medium text-light">{{ "%.8f"|format(calculation.to_amount) }} <span class="text-primary">{{ calculation.to_currency }}{% if calculation.to_currency in erc20_currencies %} (ERC-20){% endif %}</span></p>
+                                    </div>
+                                    <div class="col-6 bg-primary bg-opacity-10 p-3 rounded shadow-sm">
+                                        <p class="text-light small">Exchange Rate</p>
+                                        <p class="fw-medium text-light">1 <span class="text-primary">{{ calculation.from_currency }}{% if calculation.from_currency in erc20_currencies %} (ERC-20){% endif %}</span> = <span class="text-primary">{{ "%.8f"|format(calculation.rate) }}</span> <span class="text-primary">{{ calculation.to_currency }}{% if calculation.to_currency in erc20_currencies %} (ERC-20){% endif %}</span></p>
+                                    </div>
+                                    <div class="col-6 bg-primary bg-opacity-10 p-3 rounded shadow-sm">
+                                        <p class="text-light small">Fee</p>
+                                        <p class="fw-medium text-light">{{ calculation.rate_mode|capitalize }} <span class="text-primary">({{ "%.1f"|format(calculation.svc_fee) }}%)</span></p>
+                                    </div>
+                                </div>
+
+                                {% if pools and calculation.to_currency == 'BTC' %}
+                                <div class="mt-4 border-top border-primary pt-4">
+                                    <label class="form-label fw-medium text-light">BTC Pool Selection</label>
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="aggregation" value="yes" id="aggYes" {% if form_data and form_data.aggregation == 'yes' or not form_data %}checked{% endif %}>
+                                            <label class="form-check-label text-light" for="aggYes">Aggregated ({{ "%.8f"|format(pools.aggregated_balance) }} BTC)</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="aggregation" value="no" id="aggNo" {% if form_data and form_data.aggregation == 'no' %}checked{% endif %}>
+                                            <label class="form-check-label text-light" for="aggNo">Mixed ({{ "%.8f"|format(pools.mixed_balance) }} BTC)</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="aggregation" value="any" id="aggAny" {% if form_data and form_data.aggregation == 'any' %}checked{% endif %}>
+                                            <label class="form-check-label text-light" for="aggAny">Any Available</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="card bg-dark border-primary shadow">
+        <div class="card-body text-light">
+            <p>Current rate is a median value based on the latest trading data of the following markets: Bisq Price Indices</p>
+            <p>Exchange operations are performed automatically and completed within 1 minute (except network confirmation time)</p>
+            <p>Calculated amounts reflect the service fee deducted from the sent amount</p>
+            <p>Operations with dynamic rate will have exchange rate fixed after full input confirmation</p>
+            <p>Refund address is optional to create an order and can be provided later when needed, however it can't be changed later once provided</p>
+        </div>
+    </div>
+</section>
+
+<section id="rates" class="py-5">
+    <h2 class="text-center fw-bold mb-4 text-light">Rates</h2>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card bg-dark border-primary shadow">
+                <div class="card-body">
+                    <h3 class="fs-4 fw-semibold mb-3 text-light">Dynamic Rates</h3>
+                    <div class="list-group list-group-flush" style="max-height: 20rem; overflow-y: auto;">
+                        {% if dynamic_rates %}
+                            {% for pair, info in dynamic_rates.items() %}
+                                {% if '_' in pair %}
+                                    <div class="list-group-item bg-dark border-primary text-light d-flex justify-content-between align-items-center">
+                                        <span class="text-primary fw-medium">{{ pair }}</span>
+                                        <span class="fw-medium">{{ "%.8f"|format(info.rate|float) }}</span>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center text-light p-3">Unable to load dynamic rates at this time.</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-dark border-primary shadow">
+                <div class="card-body">
+                    <h3 class="fs-4 fw-semibold mb-3 text-light">Flat Rates</h3>
+                    <div class="list-group list-group-flush" style="max-height: 20rem; overflow-y: auto;">
+                        {% if flat_rates %}
+                            {% for pair, info in flat_rates.items() %}
+                                {% if '_' in pair %}
+                                    <div class="list-group-item bg-dark border-primary text-light d-flex justify-content-between align-items-center">
+                                        <span class="text-primary fw-medium">{{ pair }}</span>
+                                        <span class="fw-medium">{{ "%.8f"|format(info.rate|float) }}</span>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center text-light p-3">Unable to load flat rates at this time.</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

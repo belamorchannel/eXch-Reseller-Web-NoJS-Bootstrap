@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Xario.net{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}" sizes="64x64">
+    {% block head %}{% endblock %}
+</head>
+<body class="bg-dark text-light">
+    <header class="bg-dark border-bottom border-primary shadow-sm">
+        <nav class="container py-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                <a class="navbar-brand fw-bold fs-3 text-primary" href="{{ url_for('index') }}">Xario.net</a>
+                <ul class="nav flex-column flex-md-row mt-3 mt-md-0">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'index' %}active border-bottom border-primary text-light{% else %}text-secondary{% endif %}" href="{{ url_for('index') }}">Exchange</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'faq' %}active border-bottom border-primary text-light{% else %}text-secondary{% endif %}" href="{{ url_for('faq') }}">FAQ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'api_docs' %}active border-bottom border-primary text-light{% else %}text-secondary{% endif %}" href="{{ url_for('api_docs') }}">API</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="py-5 min-vh-100">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="bg-dark border-top border-primary py-4 mt-5 shadow-sm">
+        <div class="container text-center">
+            <ul class="list-unstyled text-light mb-3">
+                <li>Email: <a href="mailto:support@xario.net" class="text-primary">support@xario.net</a></li>
+                <li><a href="http://tymcpor2f4axlwkysog6ptbplylj2lrwxd6uheezvefogeidhlqfy2qd.onion/" class="text-primary">Onion</a></li>
+            </ul>
+            <div class="border-top border-primary pt-3">
+                <p class="text-light">© 2025 Xario.net All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

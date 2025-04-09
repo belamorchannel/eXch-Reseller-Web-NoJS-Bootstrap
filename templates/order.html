@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block head %}
+{% if request.args.get('autorefresh', 'on') == 'on' %}
+<meta http-equiv="refresh" content="15">
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start mb-4 gap-3">
+            <h1 class="fs-2 fw-bold text-primary">Order #{{ order.orderid }}</h1>
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-dark border border-primary text-light d-flex align-items-center gap-2">
+                    {{ order.state }}
+                    {% if order.state == 'CREATED' or order.state == 'AWAITING_INPUT' %}
+                        <span class="w-2 h-2 bg-warning rounded-circle animate-pulse"></span>
+                    {% elif order.state == 'COMPLETE' %}
+                        <span class="w-2 h-2 bg-success rounded-circle"></span>
+                    {% elif order.state in ['CANCELLED', 'REFUNDED'] %}
+                        <span class="w-2 h-2 bg-danger rounded-circle"></span>
+                    {% else %}
+                        <span class="w-2 h-2 bg-primary rounded-circle animate-pulse"></span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger bg-danger bg-opacity-25 border-danger text-light text-center mb-4 shadow-sm">{{ error }}</div>
+        {% else %}
+        <div class="row g-4">
+
+            <div class="col-lg-8">
+
+                <div class="card bg-dark border-primary shadow mb-4">
+                    <div class="card-body">
+                        <h2 class="fs-4 fw-semibold mb-3 text-light">Transaction Overview</h2>
+                        <div class="row row-cols-1 row-cols-sm-2 g-3 text-light">
+                            <div>
+                                <span class="fw-medium">Exchange Pair:</span>
+                                <p class="fw-medium text-light">{{ order.from_currency }} / {{ order.to_currency }}</p>
+                            </div>
+                            <div>
+                                <span class="fw-medium">Exchange Rate:</span>
+                                <p class="text-light">{{ "%.8f"|format(order.rate|float) }} {{ order.to_currency }}</p>
+                            </div>
+                            <div>
+                                <span class="fw-medium">Rate Mode:</span>
+                                <p class="text-light">{{ order.rate_mode|capitalize }} [{{ '0.5%' if order.rate_mode == 'dynamic' else '1%' }}]</p>
+                            </div>
+                            <div>
+                                <span class="fw-medium">Network Fee:</span>
+                                <p class="text-light">{{ "%.8f"|format(order.network_fee|float) }} {{ order.to_currency }}</p>
+                            </div>
+                            <div class="col-12">
+                                <span class="fw-medium">To {{ order.to_currency }} Address:</span>
+                                <div class="position-relative mt-1">
+                                    <input readonly type="text" value="{{ order.to_address }}" class="form-control bg-dark border-primary text-light font-monospace shadow-sm">
+                                    <span class="position-absolute end-0 top-50 translate-middle-y text-xs text-light pe-3">Copy manually</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="card bg-dark border-primary shadow mb-4">
+                    <div class="card-body">
+                        <h2 class="fs-4 fw-semibold mb-3 text-light">Send {{ order.from_currency }}</h2>
+                        <p class="text-light mb-3">To the following address:</p>
+                        <div class="position-relative mb-3">
+                            <input readonly type="text" value="{{ order.from_addr }}" class="form-control bg-dark border-primary text-light font-monospace shadow-sm">
+                            <span class="position-absolute end-0 top-50 translate-middle-y text-xs text-light pe-3">Copy manually</span>
+                        </div>
+                        <div class="d-flex gap-3">
+                            <span class="badge bg-dark border border-success text-success shadow-sm">Min: {{ "%.8f"|format(order.min_input|float) }}</span>
+                            <span class="badge bg-dark border border-danger text-danger shadow-sm">Max: {{ "%.8f"|format(order.max_input|float) }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card bg-dark border-primary shadow">
+                    <div class="card-body">
+                        <h2 class="fs-4 fw-semibold mb-3 text-light">Support Chat</h2>
+                        <div class="bg-dark border border-primary p-3 rounded mb-3 shadow-sm" style="max-height: 300px; overflow-y: auto;">
+                            {% if support_messages|length == 0 %}
+                            <p class="text-center text-light">No messages yet. Ask us anything!</p>
+                            {% else %}
+                            {% for message in support_messages %}
+                            <div class="d-flex {% if message.sender == 'USER' %}justify-content-end{% else %}justify-content-start{% endif %} mb-2">
+                                <div class="p-2 rounded {% if message.sender == 'USER' %}bg-primary bg-opacity-25 border-primary{% else %}bg-dark border-primary{% endif %} shadow-sm">
+                                    <p class="text-xs text-light mb-1">
+                                        {{ message.sender }} • {{ message.timestamp }}
+                                        {% if message.sender == 'USER' and message.read_by_support %}
+                                            <span class="text-success ms-1">✓</span>
+                                        {% endif %}
+                                    </p>
+                                    <p class="text-light">{{ message.message }}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+                        <form action="{{ url_for('send_support_message_form', order_id=order.orderid) }}" method="POST" class="d-flex gap-2">
+                            <input type="text" name="message" class="form-control bg-dark border-primary text-light shadow-sm" placeholder="Type your message..." required>
+                            <button type="submit" class="btn btn-primary shadow">Send</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-lg-4">
+
+                <div class="card bg-dark border-primary shadow mb-4">
+                    <div class="card-body">
+                        <h2 class="fs-4 fw-semibold mb-3 text-light">Actions</h2>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('download_guarantee_letter', order_id=order.orderid) }}" class="btn btn-primary shadow">Download Letter of Guarantee</a>
+                            {% if order.state not in ['COMPLETE', 'CANCELLED', 'REFUNDED'] %}
+                            <div class="d-flex align-items-center justify-content-center gap-2">
+                                <span class="text-light">Auto-refresh:</span>
+                                {% if request.args.get('autorefresh', 'on') == 'on' %}
+                                <span class="badge bg-success shadow-sm">ON</span>
+                                <a href="{{ url_for('order', order_id=order.orderid, autorefresh='off') }}" class="btn btn-sm btn-secondary shadow">OFF</a>
+                                <span class="text-xs text-light">Refreshes every 15s</span>
+                                {% else %}
+                                <a href="{{ url_for('order', order_id=order.orderid, autorefresh='on') }}" class="btn btn-sm btn-secondary shadow">ON</a>
+                                <span class="badge bg-danger shadow-sm">OFF</span>
+                                <span class="text-xs text-light">Disabled</span>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            {% if order.refund_available %}
+                            <div>
+                                {% if order.state_error %}
+                                <p class="text-danger small mb-2">Error: {{ order.state_error }}</p>
+                                {% endif %}
+                                <form action="{{ url_for('order', order_id=order.orderid) }}#refund" method="POST">
+                                    {% if order.state == 'REFUND_REQUEST' %}
+                                    <input type="hidden" name="action" value="refund_confirm">
+                                    <input type="text" name="refund_address" class="form-control bg-dark border-primary text-light shadow-sm mb-2" placeholder="Enter refund address" required>
+                                    <button type="submit" class="btn btn-warning w-100 shadow">Confirm Refund</button>
+                                    {% else %}
+                                    <input type="hidden" name="action" value="refund">
+                                    <button type="submit" class="btn btn-warning w-100 shadow">Request Refund</button>
+                                    {% endif %}
+                                </form>
+                            </div>
+                            {% endif %}
+                            {% if order.state_error == 'TO_ADDRESS_INVALID' %}
+                            <div>
+                                <p class="text-danger small mb-2">Error: {{ order.state_error }}</p>
+                                <form action="{{ url_for('revalidate_address_form', order_id=order.orderid) }}" method="POST">
+                                    <input type="text" name="new_address" class="form-control bg-dark border-primary text-light shadow-sm mb-2" placeholder="New recipient address" required>
+                                    <button type="submit" class="btn btn-primary w-100 shadow">Validate Transaction</button>
+                                </form>
+                            </div>
+                            {% endif %}
+                            {% if order.state == 'COMPLETE' %}
+                            <form action="{{ url_for('order', order_id=order.orderid) }}#remove" method="POST">
+                                <input type="hidden" name="action" value="remove">
+                                <button type="submit" class="btn btn-danger w-100 shadow">Remove Order</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card bg-dark border-primary shadow">
+                    <div class="card-body">
+                        <h2 class="fs-4 fw-semibold mb-3 text-light">Deposit Details</h2>
+                        <dl class="text-light mb-4">
+                            {% if order.from_amount_received %}
+                            <dt class="fw-medium">Amount Received:</dt>
+                            <dd class="text-light">{{ "%.8f"|format(order.from_amount_received|float) }} {{ order.from_currency }}</dd>
+                            {% endif %}
+                            {% if order.to_amount %}
+                            <dt class="fw-medium">Amount Sent:</dt>
+                            <dd class="text-light">{{ "%.8f"|format(order.to_amount|float) }} {{ order.to_currency }}</dd>
+                            {% endif %}
+                            {% if order.refund_address %}
+                            <dt class="fw-medium">Refund Address:</dt>
+                            <dd class="text-light bg-dark border border-primary rounded p-2 mt-1 shadow-sm">{{ order.refund_address }}</dd>
+                            {% endif %}
+                            {% if order.transaction_id_received %}
+                            <dt class="fw-medium">TXID Received:</dt>
+                            <dd class="text-light bg-dark border border-primary rounded p-2 mt-1 shadow-sm">{{ order.transaction_id_received }}</dd>
+                            {% endif %}
+                            {% if order.transaction_id_sent %}
+                            <dt class="fw-medium">TXID Sent:</dt>
+                            <dd class="text-light bg-dark border border-primary rounded p-2 mt-1 shadow-sm">{{ order.transaction_id_sent }}</dd>
+                            {% endif %}
+                            {% if order.refund_private_key %}
+                            <dt class="fw-medium">Refund Private Key:</dt>
+                            <dd class="text-light bg-dark border border-primary rounded p-2 mt-1 shadow-sm">{{ order.refund_private_key }}</dd>
+                            {% endif %}
+                            {% if order.wallet_pool %}
+                            <dt class="fw-medium">Wallet Pool:</dt>
+                            <dd class="text-light">{{ order.wallet_pool|capitalize }}</dd>
+                            {% endif %}
+                        </dl>
+                        {% if qr_code and order.from_addr != '_GENERATING_' %}
+                        <div class="mt-4">
+                            <p class="text-light mb-2">QR Code for Deposit:</p>
+                            <div class="bg-white p-3 rounded d-inline-block shadow-sm">
+                                <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="img-fluid" style="max-width: 12rem;">
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if order.state_error and order.state_error != 'TO_ADDRESS_INVALID' %}
+                <div class="card bg-danger bg-opacity-25 border-danger shadow">
+                    <div class="card-body">
+                        <h2 class="fs-4 fw-semibold text-light mb-2">Error</h2>
+                        <p class="text-light">{{ order.state_error }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

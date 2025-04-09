@@ -1,0 +1,712 @@
+{% extends "base.html" %}
+
+{% block title %}API Documentation{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <h1 class="text-center fw-bold mb-5 text-primary fs-2">API Documentation</h1>
+        
+        <div class="card bg-dark border-primary shadow p-4">
+            <h2 class="fw-bold mb-4 text-light fs-4">Overview</h2>
+            <div class="card bg-dark border-secondary shadow-sm p-4 mb-5">
+                <h3 class="fw-medium mb-3 text-light fs-5">General Information</h3>
+                <ul class="list-unstyled text-light">
+                    <li class="mb-2"><strong>Methods:</strong> Accepts both GET and POST requests</li>
+                    <li class="mb-2"><strong>Request Parameters:</strong> Standard HTTP parameters</li>
+                    <li class="mb-2"><strong>Response Format:</strong> JSON</li>
+                    <li class="mb-2"><strong>Main Endpoint:</strong> <code class="text-primary">https://exch.net/api</code></li>
+                    <li class="mb-2"><strong>API Key:</strong> Required (<code class="text-primary">api_key</code>) under high load. Contact <a href="mailto:support@exch.cx" class="text-primary">support@exch.cx</a> or submit a ticket.</li>
+                    <li><strong>Rates XML:</strong> Available at <code class="text-primary">https://exch.net/rates.xml</code></li>
+                </ul>
+            </div>
+
+            <h2 class="fw-bold mb-4 text-light fs-4">Endpoints</h2>
+            
+            <div class="card bg-dark border-secondary shadow-sm p-4 mb-4">
+                <h3 class="fw-medium mb-3 text-light fs-5"><code class="text-primary">/api/rates</code> - Get Exchange Rates</h3>
+                <div class="mb-3">
+                    <p class="text-light fw-medium mb-2">Request Parameters</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Parameter</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>rate_mode</code></td>
+                                <td>String</td>
+                                <td>Rate mode: <code>flat</code> or <code>dynamic</code> (Optional; Default: <code>dynamic</code>)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <p class="text-light fw-medium mb-2">Response Parameters</p>
+                    <p class="text-light mb-2">Returns a nested JSON object with exchange symbol keys (e.g., <code>BTC_LTC</code>).</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Field</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>rate</code></td>
+                                <td>Float</td>
+                                <td>Exchange rate including service fee</td>
+                            </tr>
+                            <tr>
+                                <td><code>svc_fee</code></td>
+                                <td>Float</td>
+                                <td>Service fee for selected <code>rate_mode</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>rate_mode</code></td>
+                                <td>String</td>
+                                <td>Selected rate mode (<code>flat</code> or <code>dynamic</code>)</td>
+                            </tr>
+                            <tr>
+                                <td><code>reserve</code></td>
+                                <td>Float</td>
+                                <td>Total reserve of the currency to receive</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card bg-dark border-secondary shadow-sm p-4 mb-4">
+                <h3 class="fw-medium mb-3 text-light fs-5"><code class="text-primary">/api/volume</code> - Get 24-Hour Volume</h3>
+                <div class="mb-3">
+                    <p class="text-light fw-medium mb-2">Request Parameters</p>
+                    <p class="text-light">None</p>
+                </div>
+                <div class="mb-3">
+                    <p class="text-light fw-medium mb-2">Response Parameters</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Field</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>volume</code></td>
+                                <td>Float</td>
+                                <td>24-hour volume (inbound and outbound)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <p class="text-light fw-medium mb-2">Note</p>
+                    <p class="text-light">Per-pair volumes are not provided for privacy reasons.</p>
+                </div>
+            </div>
+
+            <div class="card bg-dark border-secondary shadow-sm p-4 mb-4">
+                <h3 class="fw-medium mb-3 text-light fs-5"><code class="text-primary">/api/status</code> - Get Network Status</h3>
+                <div class="mb-3">
+                    <p class="text-light fw-medium mb-2">Request Parameters</p>
+                    <p class="text-light">None</p>
+                </div>
+                <div>
+                    <p class="text-light fw-medium mb-2">Response Parameters</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Field</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>status</code></td>
+                                <td>String</td>
+                                <td>Node status: <code>online</code> or <code>offline</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>aggregated_balance</code></td>
+                                <td>Float</td>
+                                <td>Aggregated pool balance (BTC only)</td>
+                            </tr>
+                            <tr>
+                                <td><code>mixed_balance</code></td>
+                                <td>Float</td>
+                                <td>Mixed pool balance (BTC only)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card bg-dark border-secondary shadow-sm p-4 mb-4">
+                <h3 class="fw-medium mb-3 text-light fs-5"><code class="text-primary">/api/create</code> - Create Exchange Order</h3>
+                <div class="mb-3">
+                    <p class="text-light fw-medium mb-2">Request Parameters</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Parameter</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>from_currency</code></td>
+                                <td>String</td>
+                                <td>Currency to send (Required)</td>
+                            </tr>
+                            <tr>
+                                <td><code>to_currency</code></td>
+                                <td>String</td>
+                                <td>Currency to receive (Required)</td>
+                            </tr>
+                            <tr>
+                                <td><code>to_address</code></td>
+                                <td>String</td>
+                                <td>Address for <code>to_currency</code> (Required)</td>
+                            </tr>
+                            <tr>
+                                <td><code>refund_address</code></td>
+                                <td>String</td>
+                                <td>Refund address for <code>from_currency</code> (Optional; Can be provided in <code>REFUND_REQUEST</code>)</td>
+                            </tr>
+                            <tr>
+                                <td><code>rate_mode</code></td>
+                                <td>String</td>
+                                <td>Rate mode: <code>flat</code> or <code>dynamic</code> (Optional; Default: <code>dynamic</code>)</td>
+                            </tr>
+                            <tr>
+                                <td><code>ref</code></td>
+                                <td>String</td>
+                                <td>Referrer ID (Optional)</td>
+                            </tr>
+                            <tr>
+                                <td><code>fee_option</code></td>
+                                <td>String</td>
+                                <td>Network fee: <code>s</code> (slow), <code>m</code> (medium), <code>f</code> (quick) (Optional; Default: <code>f</code>; Applies to BTC, ETH, DAI, USDC, USDT)</td>
+                            </tr>
+                            <tr>
+                                <td><code>aggregation</code></td>
+                                <td>String</td>
+                                <td>BTC pool: <code>yes</code> (aggregated), <code>no</code> (mixed), <code>any</code> (send-only) (Optional; Default: <code>yes</code> for BTC <code>from_currency</code>, <code>any</code> for BTC <code>to_currency</code>)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <p class="text-light fw-medium mb-2">Response Parameters</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Field</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>orderid</code></td>
+                                <td>String</td>
+                                <td>Exchange order ID for <code>/api/order</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card bg-dark border-secondary shadow-sm p-4 mb-4">
+                <h3 class="fw-medium mb-3 text-light fs-5"><code class="text-primary">/api/order</code> - Get Order Information</h3>
+                <div class="mb-3">
+                    <p class="text-light fw-medium mb-2">Request Parameters</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Parameter</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>orderid</code></td>
+                                <td>String</td>
+                                <td>Exchange order ID from <code>/api/create</code> (Required)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <p class="text-light fw-medium mb-2">Response Parameters</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Field</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>created</code></td>
+                                <td>String</td>
+                                <td>Order creation timestamp</td>
+                            </tr>
+                            <tr>
+                                <td><code>state</code></td>
+                                <td>String</td>
+                                <td>Current state: <code>CREATED</code>, <code>CANCELLED</code>, <code>AWAITING_INPUT</code>, etc.</td>
+                            </tr>
+                            <tr>
+                                <td><code>from_currency</code></td>
+                                <td>String</td>
+                                <td>Currency to send</td>
+                            </tr>
+                            <tr>
+                                <td><code>from_addr</code></td>
+                                <td>String</td>
+                                <td>Deposit address for <code>from_currency</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>to_currency</code></td>
+                                <td>String</td>
+                                <td>Currency to receive</td>
+                            </tr>
+                            <tr>
+                                <td><code>to_address</code></td>
+                                <td>String</td>
+                                <td>Address for <code>to_currency</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>rate_mode</code></td>
+                                <td>String</td>
+                                <td>Rate mode: <code>flat</code> or <code>dynamic</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>rate</code></td>
+                                <td>Float</td>
+                                <td>Current exchange rate</td>
+                            </tr>
+                            <tr>
+                                <td><code>svc_fee</code></td>
+                                <td>Float</td>
+                                <td>Service fee (included in <code>to_amount</code>)</td>
+                            </tr>
+                            <tr>
+                                <td><code>network_fee</code></td>
+                                <td>Float</td>
+                                <td>Network fee (included in <code>to_amount</code>)</td>
+                            </tr>
+                            <tr>
+                                <td><code>from_amount_received</code></td>
+                                <td>Float/Null</td>
+                                <td>Amount received (null if none)</td>
+                            </tr>
+                            <tr>
+                                <td><code>to_amount</code></td>
+                                <td>Float/Null</td>
+                                <td>Amount to send (null if none)</td>
+                            </tr>
+                            <tr>
+                                <td><code>wallet_pool</code></td>
+                                <td>String</td>
+                                <td>Pool type for BTC: <code>aggregated</code>, <code>mixed</code>, <code>any</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>transaction_id_received</code></td>
+                                <td>String/Null</td>
+                                <td>TXID for received funds (null if none)</td>
+                            </tr>
+                            <tr>
+                                <td><code>transaction_id_sent</code></td>
+                                <td>String/Null</td>
+                                <td>TXID for sent funds (null if not sent)</td>
+                            </tr>
+                            <tr>
+                                <td><code>refund_private_key</code></td>
+                                <td>String/Null</td>
+                                <td>Private key for ETH token refunds (null if not applicable)</td>
+                            </tr>
+                            <tr>
+                                <td><code>min_input</code></td>
+                                <td>Float</td>
+                                <td>Minimum deposit amount</td>
+                            </tr>
+                            <tr>
+                                <td><code>max_input</code></td>
+                                <td>Float</td>
+                                <td>Maximum deposit amount</td>
+                            </tr>
+                            <tr>
+                                <td><code>state_error</code></td>
+                                <td>String/Null</td>
+                                <td>Error state (null if none)</td>
+                            </tr>
+                            <tr>
+                                <td><code>refund_available</code></td>
+                                <td>Boolean</td>
+                                <td>Refund availability</td>
+                            </tr>
+                            <tr>
+                                <td><code>orderid</code></td>
+                                <td>String</td>
+                                <td>Exchange order ID</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card bg-dark border-secondary shadow-sm p-4 mb-4">
+                <h3 class="fw-medium mb-3 text-light fs-5"><code class="text-primary">/api/order/fetch_guarantee</code> - Fetch Letter of Guarantee</h3>
+                <div class="mb-3">
+                    <p class="text-light fw-medium mb-2">Request Parameters</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Parameter</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>orderid</code></td>
+                                <td>String</td>
+                                <td>Exchange order ID (Required)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <p class="text-light fw-medium mb-2">Response</p>
+                    <p class="text-light">File containing a Letter of Guarantee signed with address <code>1P59vP5TNXAFRnQJvZSkwhYXejYW3teXch</code></p>
+                </div>
+            </div>
+
+            <div class="card bg-dark border-secondary shadow-sm p-4 mb-4">
+                <h3 class="fw-medium mb-3 text-light fs-5"><code class="text-primary">/api/order/refund</code> - Request Refund</h3>
+                <div class="mb-3">
+                    <p class="text-light fw-medium mb-2">Request Parameters</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Parameter</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>orderid</code></td>
+                                <td>String</td>
+                                <td>Exchange order ID (Required)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <p class="text-light fw-medium mb-2">Response Parameters</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Field</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>result</code></td>
+                                <td>Boolean</td>
+                                <td><code>true</code> if successful, <code>false</code> if failed</td>
+                            </tr>
+                            <tr>
+                                <td><code>error</code></td>
+                                <td>String/Null</td>
+                                <td>Error message if failed (null if successful)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card bg-dark border-secondary shadow-sm p-4 mb-4">
+                <h3 class="fw-medium mb-3 text-light fs-5"><code class="text-primary">/api/order/refund_confirm</code> - Confirm Refund</h3>
+                <div class="mb-3">
+                    <p class="text-light fw-medium mb-2">Request Parameters</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Parameter</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>orderid</code></td>
+                                <td>String</td>
+                                <td>Exchange order ID (Required)</td>
+                            </tr>
+                            <tr>
+                                <td><code>refund_address</code></td>
+                                <td>String</td>
+                                <td>Address for refund (Required)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <p class="text-light fw-medium mb-2">Response Parameters</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Field</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>result</code></td>
+                                <td>Boolean</td>
+                                <td><code>true</code> if successful, <code>false</code> if failed</td>
+                            </tr>
+                            <tr>
+                                <td><code>error</code></td>
+                                <td>String/Null</td>
+                                <td>Error message if failed (null if successful)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card bg-dark border-secondary shadow-sm p-4 mb-4">
+                <h3 class="fw-medium mb-3 text-light fs-5"><code class="text-primary">/api/order/revalidate_address</code> - Revalidate Address</h3>
+                <div class="mb-3">
+                    <p class="text-light fw-medium mb-2">Request Parameters</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Parameter</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>orderid</code></td>
+                                <td>String</td>
+                                <td>Exchange order ID (Required)</td>
+                            </tr>
+                            <tr>
+                                <td><code>to_address</code></td>
+                                <td>String</td>
+                                <td>New address for <code>to_currency</code> (Required)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <p class="text-light fw-medium mb-2">Response Parameters</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Field</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>result</code></td>
+                                <td>Boolean</td>
+                                <td><code>true</code> if successful, <code>false</code> if failed</td>
+                            </tr>
+                            <tr>
+                                <td><code>error</code></td>
+                                <td>String/Null</td>
+                                <td>Error message if failed (null if successful)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card bg-dark border-secondary shadow-sm p-4 mb-4">
+                <h3 class="fw-medium mb-3 text-light fs-5"><code class="text-primary">/api/order/remove</code> - Remove Order Data</h3>
+                <div class="mb-3">
+                    <p class="text-light fw-medium mb-2">Request Parameters</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Parameter</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>orderid</code></td>
+                                <td>String</td>
+                                <td>Exchange order ID (Required)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <p class="text-light fw-medium mb-2">Response Parameters</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Field</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>result</code></td>
+                                <td>Boolean</td>
+                                <td><code>true</code> if successful, <code>false</code> if failed</td>
+                            </tr>
+                            <tr>
+                                <td><code>error</code></td>
+                                <td>String/Null</td>
+                                <td>Error message if failed (null if successful)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card bg-dark border-secondary shadow-sm p-4 mb-4">
+                <h3 class="fw-medium mb-3 text-light fs-5"><code class="text-primary">/api/order/support_message</code> - Send Support Message</h3>
+                <div class="mb-3">
+                    <p class="text-light fw-medium mb-2">Request Parameters</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Parameter</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>orderid</code></td>
+                                <td>String</td>
+                                <td>Exchange order ID (Required)</td>
+                            </tr>
+                            <tr>
+                                <td><code>supportmessage</code></td>
+                                <td>String</td>
+                                <td>Message content (Required)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <p class="text-light fw-medium mb-2">Response Parameters</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Field</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>result</code></td>
+                                <td>Boolean</td>
+                                <td><code>true</code> if successful, <code>false</code> if failed</td>
+                            </tr>
+                            <tr>
+                                <td><code>error</code></td>
+                                <td>String/Null</td>
+                                <td>Error message if failed (null if successful)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card bg-dark border-secondary shadow-sm p-4 mb-4">
+                <h3 class="fw-medium mb-3 text-light fs-5"><code class="text-primary">/api/order/support_messages</code> - Get Support Messages</h3>
+                <div class="mb-3">
+                    <p class="text-light fw-medium mb-2">Request Parameters</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Parameter</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>orderid</code></td>
+                                <td>String</td>
+                                <td>Exchange order ID (Required)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <p class="text-light fw-medium mb-2">Response Parameters</p>
+                    <p class="text-light mb-2">JSON array of message objects:</p>
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Field</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>timestamp</code></td>
+                                <td>String</td>
+                                <td>Message timestamp</td>
+                            </tr>
+                            <tr>
+                                <td><code>sender</code></td>
+                                <td>String</td>
+                                <td>Sender identifier</td>
+                            </tr>
+                            <tr>
+                                <td><code>message</code></td>
+                                <td>String</td>
+                                <td>Message content</td>
+                            </tr>
+                            <tr>
+                                <td><code>read_by_support</code></td>
+                                <td>Boolean</td>
+                                <td><code>true</code> if read by support (only if sender is <code>USER</code>)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            <p class="text-light">Need help with API integration? <a href="{{ url_for('contact') }}" class="text-primary">Contact our support team</a>.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

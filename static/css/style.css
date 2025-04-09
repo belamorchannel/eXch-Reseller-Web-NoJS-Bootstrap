@@ -1,0 +1,89 @@
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: #1a1d22;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(13, 110, 253, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(25, 135, 84, 0.1) 0%, transparent 20%);
+}
+
+.card {
+    background: #212529;
+    border-color: #0d6efd;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+    position: relative;
+    overflow: hidden;
+}
+
+.form-control, .form-select {
+    background: #2c3035;
+    border-color: #0d6efd;
+    color: #f8f9fa;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.list-group-item {
+    background: #212529;
+    border-color: #0d6efd;
+    color: #f8f9fa;
+}
+
+.list-group-item:hover {
+    background: #2c3035;
+}
+
+.badge {
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #0d6efd #212529;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #212529;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #0d6efd;
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #0b5ed7;
+}
+
+.nav {
+    gap: 1rem;
+}
+
+.nav-link {
+    color: #adb5bd;
+    padding: 0.5rem 1rem;
+}
+
+.nav-link.active {
+    color: #f8f9fa;
+}
+
+.shadow-sm {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+@media (max-width: 768px) {
+    .nav {
+        text-align: center;
+    }
+}

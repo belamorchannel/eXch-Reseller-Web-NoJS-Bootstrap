@@ -1,0 +1,6 @@
+Flask==3.0.3          # main framework
+aiohttp==3.9.5        # http for api requests
+aiohttp-socks==0.8.4  # aiohttp, proxy for tor onion
+python-dotenv==1.0.1  # Variables
+qrcode==7.4.2         # QR codes
+Pillow==10.3.0        # QR to IMG
